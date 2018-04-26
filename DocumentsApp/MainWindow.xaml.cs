@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace DocumentsApp
 {
@@ -23,6 +13,62 @@ namespace DocumentsApp
         public MainWindow()
         {
             InitializeComponent();
+
+            ListView.View = CreateGridView();
+            ListView.ItemsSource = GetDocumentsInfo();
+        }
+
+        public GridView CreateGridView()
+        {
+            GridView gridView = new GridView();
+
+            gridView.Columns.Add(new GridViewColumn
+            {
+                Header = "Тема документа",
+                DisplayMemberBinding = new Binding("DocumentTheme")
+            });
+            gridView.Columns.Add(new GridViewColumn
+            {
+                Header = "Создатель",
+                DisplayMemberBinding = new Binding("Creator")
+            });
+            gridView.Columns.Add(new GridViewColumn
+            {
+                Header = "Дата создания",
+                DisplayMemberBinding = new Binding("CreatedDate"),
+                HeaderStringFormat = "d"
+            });
+            gridView.Columns.Add(new GridViewColumn
+            {
+                Header = "Кем подписан",
+                DisplayMemberBinding = new Binding("Signs")
+            });
+
+            return gridView;
+        }
+
+        public List<DocumentInfo> GetDocumentsInfo()
+        {
+            List<DocumentInfo> documentsInfo = new List<DocumentInfo>();
+
+
+            using (var context = new DocumentContext())
+            {
+                foreach (var document in context.Documents)
+                {
+                    var documentInfo = new DocumentInfo
+                    {
+                        DocumentTheme = document.Theme,
+                        CreatedDate = document.CreateDate,
+                        Creator = document.Creator.Login,
+                    };
+                    documentInfo.InsertSigns(document.Signs);
+
+                    documentsInfo.Add(documentInfo);
+                }
+            }
+
+            return documentsInfo;
         }
     }
 }
